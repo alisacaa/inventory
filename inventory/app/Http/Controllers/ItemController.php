@@ -2,38 +2,57 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Item;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Api\BaseController;
+use App\Http\Requests\StoreItemRequest;
+use App\Http\Requests\UpdateItemRequest;
+use App\Services\ItemService;
 
-class ItemController extends Controller
+class ItemController extends BaseController
 {
-    public function index()
+    protected ItemService $svc;
+
+    public function __construct(ItemService $svc)
     {
-        return response()->json(Item::with('category')->get());
+        $this->svc = $svc;
     }
 
-    public function store(Request $request)
+    public function index()
     {
-        $item = Item::create($request->all());
-        return response()->json($item, 201);
+        return $this->success($this->svc->all());
+    }
+
+    public function store(StoreItemRequest $req)
+    {
+        $item = $this->svc->create($req->validated());
+        return $this->success($item, 'Item dibuat', 201);
     }
 
     public function show($id)
     {
-        $item = Item::with('category')->findOrFail($id);
-        return response()->json($item);
+        try {
+            return $this->success($this->svc->find($id));
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 404);
+        }
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateItemRequest $req, $id)
     {
-        $item = Item::findOrFail($id);
-        $item->update($request->all());
-        return response()->json($item);
+        try {
+            $item = $this->svc->update($id, $req->validated());
+            return $this->success($item, 'Item diperbarui');
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 404);
+        }
     }
 
     public function destroy($id)
     {
-        Item::destroy($id);
-        return response()->json(null, 204);
+        try {
+            $this->svc->delete($id);
+            return $this->success(null, 'Item dihapus', 204);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 404);
+        }
     }
 }
