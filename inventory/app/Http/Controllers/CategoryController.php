@@ -1,39 +1,44 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
+use App\Services\CategoryService;
+use App\Http\Controllers\Api\BaseController;
 
-class CategoryController extends Controller
-{
-    public function index()
-    {
-        return response()->json(Category::all());
+class CategoryController extends BaseController {
+
+    protected CategoryService $svc;
+
+    public function __construct(CategoryService $svc) {
+        $this->svc = $svc;
     }
 
-    public function store(Request $request)
-    {
-        $category = Category::create($request->all());
-        return response()->json($category, 201);
+    public function index() {
+        return $this->success($this->svc->all());
     }
 
-    public function show($id)
-    {
-        $category = Category::findOrFail($id);
-        return response()->json($category);
+    public function store(StoreCategoryRequest $req) {
+        $cat = $this->svc->create($req->validated());
+        return $this->success($cat, "Kategori dibuat", 201);
     }
 
-    public function update(Request $request, $id)
-    {
-        $category = Category::findOrFail($id);
-        $category->update($request->all());
-        return response()->json($category);
+    public function show($id) {
+        try {
+            $cat = $this->svc->find($id);
+            return $this->success($cat);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 404);
+        }
     }
 
-    public function destroy($id)
-    {
-        Category::destroy($id);
-        return response()->json(null, 204);
+    public function update(UpdateCategoryRequest $req, $id) {
+        $cat = $this->svc->update($id, $req->validated());
+        return $this->success($cat, "Kategori diperbarui");
+    }
+
+    public function destroy($id) {
+        $this->svc->delete($id);
+        return $this->success(null, "Kategori dihapus", 204);
     }
 }
