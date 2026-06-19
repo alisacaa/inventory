@@ -1,32 +1,36 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Item;
 
-class ItemService {
-
-    public function all() {
+class ItemService
+{
+    public function all()
+    {
         return Item::all();
     }
 
-    public function find($id) {
-        $item = Item::find($id);
-        if (!$item) throw new \Exception("Item tidak ditemukan");
-        return $item;
+    public function find($id)
+    {
+        return Item::findOrFail($id);
     }
 
-    public function create(array $data) {
+    public function create(array $data)
+    {
         return Item::create($data);
     }
 
-    public function update($id, array $data) {
-        $item = $this->find($id);
+    public function update($id, array $data)
+    {
+        $item = Item::findOrFail($id);
         $item->update($data);
         return $item;
     }
 
-    public function delete($id) {
-        $item = $this->find($id);
+    public function delete($id)
+    {
+        $item = Item::findOrFail($id);
         $item->delete();
     }
 }

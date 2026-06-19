@@ -1,21 +1,25 @@
 <?php
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 
-class BaseController extends Controller {
-
-    protected function success($data = null, $message = null, $code = 200) {
+class BaseController extends Controller
+{
+    public function success($data, $message = 'Success', $code = 200)
+    {
         return response()->json([
-            'success' => true,
+            'status'  => 'success',
             'data'    => $data,
             'message' => $message,
         ], $code);
     }
 
-    protected function error($message = null, $code = 400) {
+    public function error($message = 'Error', $code = 500)
+    {
         return response()->json([
-            'success' => false,
+            'status'  => 'error',
+            'data'    => null,
             'message' => $message,
         ], $code);
     }
