@@ -14,9 +14,16 @@ class ItemController extends BaseController {
         $this->svc = $svc;
     }
 
-    public function index() {
-        return $this->success($this->svc->all());
+    public function index(Request $request)
+{
+    $query = Item::with('category');
+
+    if ($request->filled('category_id')) {
+        $query->where('category_id', $request->category_id);
     }
+
+    return $this->success($query->get());
+}
 
     public function store(StoreItemRequest $req) {
         $item = $this->svc->create($req->validated());
